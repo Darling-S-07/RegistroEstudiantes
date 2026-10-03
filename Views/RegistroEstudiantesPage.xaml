@@ -2,11 +2,92 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="RegistroEstudiantes.Views.RegistroEstudiantesPage"
-             Title="RegistroEstudiantesPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title="Registro de Estudiantes">
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30"
+            Spacing="10">
+
+            <Label
+                Text="Registro de Estudiantes"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1"
+                FontAttributes="Bold"
+                HorizontalOptions="Center"
+                FontSize="28" />
+
+            <!-- ID -->
+            <Label Text="ID Estudiante" />
+            <Entry
+                x:Name="IdEntry"
+                Placeholder="Se genera automáticamente"
+                IsEnabled="False"
+                SemanticProperties.Description="ID del estudiante, se genera automáticamente" />
+
+            <!-- Nombre -->
+            <Label Text="Nombre *" />
+            <Entry
+                x:Name="NombreEntry"
+                Placeholder="Nombre del estudiante"
+                Keyboard="Text"
+                MaxLength="100"
+                ClearButtonVisibility="WhileEditing"
+                SemanticProperties.Description="Nombre del estudiante" />
+
+            <!-- Apellido -->
+            <Label Text="Apellido *" />
+            <Entry
+                x:Name="ApellidoEntry"
+                Placeholder="Apellido del estudiante"
+                Keyboard="Text"
+                MaxLength="100"
+                ClearButtonVisibility="WhileEditing"
+                SemanticProperties.Description="Apellido del estudiante" />
+
+            <!-- Correo Electrónico -->
+            <Label Text="Correo Electrónico *" />
+            <Entry
+                x:Name="CorreoEntry"
+                Placeholder="ejemplo@correo.com"
+                Keyboard="Email"
+                MaxLength="150"
+                ClearButtonVisibility="WhileEditing"
+                SemanticProperties.Description="Correo electrónico del estudiante" />
+
+            <!-- Teléfono -->
+            <Label Text="Teléfono" />
+            <Entry
+                x:Name="TelefonoEntry"
+                Placeholder="Número de teléfono"
+                Keyboard="Telephone"
+                MaxLength="20"
+                ClearButtonVisibility="WhileEditing"
+                SemanticProperties.Description="Teléfono del estudiante" />
+
+            <!-- Carrera -->
+            <Label Text="Carrera / Grado" />
+            <Entry
+                x:Name="CarreraEntry"
+                Placeholder="Ingeniería en Sistemas, Administración, etc."
+                Keyboard="Text"
+                MaxLength="100"
+                ClearButtonVisibility="WhileEditing"
+                SemanticProperties.Description="Carrera del estudiante" />
+
+            <!-- Fecha de Registro -->
+            <Label Text="Fecha de Registro *" />
+            <DatePicker
+                x:Name="FechaRegistroPicker"
+                SemanticProperties.Description="Fecha de registro del estudiante" />
+
+            <!-- Botón Guardar -->
+            <Button
+                x:Name="GuardarButton"
+                Text="Guardar Estudiante"
+                Margin="0,15,0,0"
+                SemanticProperties.Description="Guarda la información del estudiante"
+                Clicked="GuardarButton_Clicked" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
