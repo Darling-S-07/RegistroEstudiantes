@@ -4,7 +4,7 @@ using RegistroEstudiantes.Models;
 namespace RegistroEstudiantes.Data;
 
 /// Maneja la conexión e inicialización de la base de datos SQLite
-/// y las operaciones sobre la tabla de productos.
+/// y las operaciones sobre la tabla de estudiantes.
 public class SQLiteDatabase
 {
     private const SQLiteOpenFlags Flags =
@@ -46,26 +46,39 @@ public class SQLiteDatabase
         }
     }
 
-    // Create: guarda un producto. Devuelve el número de filas insertadas.
-    // Tras insertar, producto.IdProducto contiene el ID generado.
+    // Create: guarda un estudiante. Devuelve el número de filas insertadas.
+    // Tras insertar, estudiante.Id contiene el ID generado.
+    // Lanza SQLiteException (Result = Constraint) si el NumeroCuenta ya existe.
     public async Task<int> GuardarEstudianteAsync(Estudiante estudiante)
     {
         var db = await GetConnectionAsync();
         return await db.InsertAsync(estudiante);
     }
 
-    // Read
-    public async Task<List<Estudiante>> ObtenerEstudianteAsync()
+    // Read: todos los estudiantes, del más reciente al más antiguo.
+    public async Task<List<Estudiante>> ObtenerEstudiantesAsync()
     {
         var db = await GetConnectionAsync();
-        return await db.Table<Estudiante>().ToListAsync();
+        return await db.Table<Estudiante>()
+                       .OrderByDescending(e => e.Id)
+                       .ToListAsync();
     }
 
     // Read by Id
-    public async Task<Estudiante?> ObtenerEstudianteIdAsync(int id)
+    public async Task<Estudiante?> ObtenerEstudiantePorIdAsync(int id)
     {
         var db = await GetConnectionAsync();
         return await db.FindAsync<Estudiante>(id);
+    }
+
+    // Validación de cuenta única: true si ya existe un estudiante con ese número de cuenta.
+    public async Task<bool> ExisteNumeroCuentaAsync(string numeroCuenta)
+    {
+        var db = await GetConnectionAsync();
+        int cantidad = await db.Table<Estudiante>()
+                               .Where(e => e.NumeroCuenta == numeroCuenta)
+                               .CountAsync();
+        return cantidad > 0;
     }
 
     // Update

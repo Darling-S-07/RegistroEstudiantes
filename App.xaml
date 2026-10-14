@@ -9,6 +9,10 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Colores del diseño de referencia -->
+            <Color x:Key="AzulTitulo">#1E6FD9</Color>
+            <Color x:Key="Turquesa">#12A89D</Color>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

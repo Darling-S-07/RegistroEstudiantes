@@ -8,23 +8,19 @@ namespace RegistroEstudiantes.Models
     public class Estudiante
     {
         [PrimaryKey, AutoIncrement]
-        public int IdEstudiante { get; set; }
+        public int Id { get; set; }
 
-        [MaxLength(100), NotNull]
-        public string Nombre { get; set; } = string.Empty;
+        // [Unique] crea un índice único en SQLite: no permite dos estudiantes con la misma cuenta.
+        [Unique, NotNull, MaxLength(20)]
+        public string NumeroCuenta { get; set; } = string.Empty;
 
-        [MaxLength(100), NotNull]
-        public string Apellido { get; set; } = string.Empty;
+        [NotNull, MaxLength(150)]
+        public string NombreCompleto { get; set; } = string.Empty;
 
-        [MaxLength(150), NotNull]
-        public string Correo { get; set; } = string.Empty;
-
-        [MaxLength(20)]
-        public string Telefono { get; set; } = string.Empty;
-
-        [MaxLength(100)]
+        [NotNull, MaxLength(100)]
         public string Carrera { get; set; } = string.Empty;
 
-        public DateTime FechaRegistro { get; set; } = DateTime.Now;
+        [NotNull, MaxLength(150)]
+        public string Correo { get; set; } = string.Empty;
     }
 }
