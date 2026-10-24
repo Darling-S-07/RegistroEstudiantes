@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using SQLite;
 
 namespace RegistroEstudiantes.Models
@@ -17,10 +15,22 @@ namespace RegistroEstudiantes.Models
         [NotNull, MaxLength(150)]
         public string NombreCompleto { get; set; } = string.Empty;
 
+        [NotNull, MaxLength(150)]
+        public string Correo { get; set; } = string.Empty;
+
+        [NotNull, MaxLength(20)]
+        public string Telefono { get; set; } = string.Empty;
+
         [NotNull, MaxLength(100)]
         public string Carrera { get; set; } = string.Empty;
 
-        [NotNull, MaxLength(150)]
-        public string Correo { get; set; } = string.Empty;
+        [NotNull]
+        public DateTime FechaNacimiento { get; set; }
+
+        [NotNull, MaxLength(20)]
+        public string Genero { get; set; } = string.Empty;
+
+        [NotNull]
+        public bool AceptaTerminos { get; set; }
     }
 }

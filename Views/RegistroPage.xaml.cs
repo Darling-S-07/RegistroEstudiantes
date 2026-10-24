@@ -6,7 +6,7 @@ using SQLite;
 
 namespace RegistroEstudiantes.Views;
 
-public partial class RegistroEstudiantesPage : ContentPage
+public partial class RegistroPage : ContentPage
 {
     private static readonly string[] Carreras =
     {
@@ -23,21 +23,20 @@ public partial class RegistroEstudiantesPage : ContentPage
     private readonly SQLiteDatabase _database;
     private readonly ObservableCollection<Estudiante> _estudiantes = new();
 
-    public RegistroEstudiantesPage()
+    public RegistroPage()
     {
         InitializeComponent();
 
-        // Archivo nuevo: el esquema anterior (IdEstudiante, Nombre, Apellido...) es incompatible.
         string dbPath = Path.Combine(FileSystem.AppDataDirectory, "registro_estudiantes.db3");
         _database = new SQLiteDatabase(dbPath);
 
         CarreraPicker.ItemsSource = Carreras;
+        FechaNacimientoPicker.MaximumDate = DateTime.Today;
         BindableLayout.SetItemsSource(ListaEstudiantes, _estudiantes);
 
         LimpiarFormulario();
     }
 
-    // Consulta: al abrir la página se cargan los estudiantes ya guardados (persistencia).
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -65,7 +64,7 @@ public partial class RegistroEstudiantesPage : ContentPage
 
     private async void GuardarButton_Clicked(object? sender, EventArgs e)
     {
-        // 1. Validar campos obligatorios y formato del correo
+        // 1. Validar todos los campos
         Estudiante? estudiante = ValidarFormulario(out List<string> errores, out VisualElement? campoInvalido);
 
         if (estudiante is null)
@@ -79,11 +78,20 @@ public partial class RegistroEstudiantesPage : ContentPage
             return;
         }
 
-        // 2. Guardar en SQLite (se deshabilita el botón para evitar duplicados por doble toque)
+        // 2. Mostrar resumen de los datos antes de guardar
+        bool confirmar = await DisplayAlertAsync(
+            "Resumen del estudiante",
+            ConstruirResumen(estudiante),
+            "Guardar",
+            "Cancelar");
+
+        if (!confirmar)
+            return;
+
+        // 3. Guardar en SQLite (se deshabilita el botón para evitar duplicados por doble toque)
         GuardarButton.IsEnabled = false;
         try
         {
-            // Validar cuenta única antes de insertar
             if (await _database.ExisteNumeroCuentaAsync(estudiante.NumeroCuenta))
             {
                 await MostrarCuentaDuplicadaAsync(estudiante.NumeroCuenta);
@@ -95,27 +103,25 @@ public partial class RegistroEstudiantesPage : ContentPage
             await CargarEstudiantesAsync();
             LimpiarFormulario();
 
-            await DisplayAlertAsync(
-                "Éxito",
-                $"El estudiante {estudiante.NombreCompleto} se registró correctamente.",
-                "OK");
+            await DisplayAlertAsync("Éxito", "El estudiante se registró correctamente.", "OK");
         }
         catch (SQLiteException ex) when (ex.Result == SQLite3.Result.Constraint)
         {
-            // Respaldo: el índice único de la base de datos rechazó la cuenta repetida.
             await MostrarCuentaDuplicadaAsync(estudiante.NumeroCuenta);
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync(
-                "Error",
-                $"Ocurrió un error al guardar el estudiante: {ex.Message}",
-                "OK");
+            await DisplayAlertAsync("Error", $"Ocurrió un error al guardar el estudiante: {ex.Message}", "OK");
         }
         finally
         {
             GuardarButton.IsEnabled = true;
         }
+    }
+
+    private void LimpiarButton_Clicked(object? sender, EventArgs e)
+    {
+        LimpiarFormulario();
     }
 
     private async Task MostrarCuentaDuplicadaAsync(string numeroCuenta)
@@ -126,6 +132,19 @@ public partial class RegistroEstudiantesPage : ContentPage
             "OK");
 
         NumeroCuentaEntry.Focus();
+    }
+
+    private static string ConstruirResumen(Estudiante estudiante)
+    {
+        return
+            $"Número de cuenta: {estudiante.NumeroCuenta}\n" +
+            $"Nombre: {estudiante.NombreCompleto}\n" +
+            $"Correo: {estudiante.Correo}\n" +
+            $"Teléfono: {estudiante.Telefono}\n" +
+            $"Carrera: {estudiante.Carrera}\n" +
+            $"Fecha de nacimiento: {estudiante.FechaNacimiento:dd/MM/yyyy}\n" +
+            $"Género: {estudiante.Genero}\n" +
+            $"Acepta términos: {(estudiante.AceptaTerminos ? "Sí" : "No")}";
     }
 
     /// Valida todos los campos. Devuelve el estudiante si todo es correcto;
@@ -145,16 +164,15 @@ public partial class RegistroEstudiantesPage : ContentPage
         string numeroCuenta = NumeroCuentaEntry.Text?.Trim() ?? string.Empty;
         if (numeroCuenta.Length == 0)
             Falla("El número de cuenta es obligatorio.", NumeroCuentaEntry);
+        else if (!NumeroCuentaEsValido(numeroCuenta))
+            Falla("El número de cuenta debe contener solo dígitos (sin letras ni símbolos).", NumeroCuentaEntry);
 
         // Nombre completo
         string nombreCompleto = NombreCompletoEntry.Text?.Trim() ?? string.Empty;
         if (nombreCompleto.Length == 0)
             Falla("El nombre completo es obligatorio.", NombreCompletoEntry);
-
-        // Carrera
-        string carrera = CarreraPicker.SelectedItem as string ?? string.Empty;
-        if (carrera.Length == 0)
-            Falla("Selecciona una carrera.", CarreraPicker);
+        else if (!NombreCompletoEsValido(nombreCompleto))
+            Falla("El nombre completo solo debe contener letras y espacios (mínimo dos palabras).", NombreCompletoEntry);
 
         // Correo
         string correo = CorreoEntry.Text?.Trim() ?? string.Empty;
@@ -162,6 +180,41 @@ public partial class RegistroEstudiantesPage : ContentPage
             Falla("El correo electrónico es obligatorio.", CorreoEntry);
         else if (!CorreoEsValido(correo))
             Falla("El correo electrónico no tiene un formato válido (ejemplo@correo.com).", CorreoEntry);
+
+        // Teléfono
+        string telefono = TelefonoEntry.Text?.Trim() ?? string.Empty;
+        if (telefono.Length == 0)
+            Falla("El teléfono es obligatorio.", TelefonoEntry);
+        else if (!TelefonoEsValido(telefono))
+            Falla("El teléfono debe contener solo números (y opcionalmente un guion), con al menos 8 dígitos.", TelefonoEntry);
+
+        // Carrera
+        string carrera = CarreraPicker.SelectedItem as string ?? string.Empty;
+        if (carrera.Length == 0)
+            Falla("Selecciona una carrera.", CarreraPicker);
+
+        // Fecha de nacimiento
+        DateTime? fechaNacimiento = FechaNacimientoPicker.Date;
+        if (fechaNacimiento is null || fechaNacimiento.Value.Date >= DateTime.Today)
+            Falla("Selecciona una fecha de nacimiento válida.", FechaNacimientoPicker);
+        else if (DateTime.Today.AddYears(-120) > fechaNacimiento.Value.Date)
+            Falla("La fecha de nacimiento no es válida.", FechaNacimientoPicker);
+
+        // Género
+        string genero = string.Empty;
+        if (GeneroMasculinoRadio.IsChecked)
+            genero = "Masculino";
+        else if (GeneroFemeninoRadio.IsChecked)
+            genero = "Femenino";
+        else if (GeneroOtroRadio.IsChecked)
+            genero = "Otro";
+
+        if (genero.Length == 0)
+            Falla("Selecciona un género.", GeneroMasculinoRadio);
+
+        // Términos y condiciones
+        if (!TerminosCheckBox.IsChecked)
+            Falla("Debes aceptar los términos y condiciones.", TerminosCheckBox);
 
         errores = listaErrores;
         primerCampoInvalido = primerInvalido;
@@ -173,8 +226,12 @@ public partial class RegistroEstudiantesPage : ContentPage
         {
             NumeroCuenta = numeroCuenta,
             NombreCompleto = nombreCompleto,
+            Correo = correo,
+            Telefono = telefono,
             Carrera = carrera,
-            Correo = correo
+            FechaNacimiento = fechaNacimiento!.Value.Date,
+            Genero = genero,
+            AceptaTerminos = TerminosCheckBox.IsChecked
         };
     }
 
@@ -195,11 +252,39 @@ public partial class RegistroEstudiantesPage : ContentPage
         }
     }
 
+    // Acepta dígitos y guiones, con al menos 8 dígitos (formato hondureño típico: 9999-9999).
+    private static bool TelefonoEsValido(string telefono)
+    {
+        int digitos = telefono.Count(char.IsDigit);
+        bool soloDigitosYGuiones = telefono.All(c => char.IsDigit(c) || c == '-');
+        return soloDigitosYGuiones && digitos >= 8;
+    }
+
+    // Solo dígitos, sin letras ni símbolos (ej. 20231001).
+    private static bool NumeroCuentaEsValido(string numeroCuenta)
+    {
+        return numeroCuenta.All(char.IsDigit);
+    }
+
+    // Solo letras (incluye tildes y ñ) y espacios, con al menos dos palabras (nombre y apellido).
+    private static bool NombreCompletoEsValido(string nombreCompleto)
+    {
+        bool soloLetrasYEspacios = nombreCompleto.All(c => char.IsLetter(c) || c == ' ');
+        int palabras = nombreCompleto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+        return soloLetrasYEspacios && palabras >= 2;
+    }
+
     private void LimpiarFormulario()
     {
         NumeroCuentaEntry.Text = string.Empty;
         NombreCompletoEntry.Text = string.Empty;
-        CarreraPicker.SelectedIndex = -1;
         CorreoEntry.Text = string.Empty;
+        TelefonoEntry.Text = string.Empty;
+        CarreraPicker.SelectedIndex = -1;
+        FechaNacimientoPicker.Date = DateTime.Today.AddYears(-18);
+        GeneroMasculinoRadio.IsChecked = false;
+        GeneroFemeninoRadio.IsChecked = false;
+        GeneroOtroRadio.IsChecked = false;
+        TerminosCheckBox.IsChecked = false;
     }
 }

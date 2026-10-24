@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:RegistroEstudiantes.Models"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             x:Class="RegistroEstudiantes.Views.RegistroPage"
+             Title="Registro de estudiantes">
+    <ScrollView>
+        <Grid Padding="24"
+              RowSpacing="8"
+              ColumnSpacing="12">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <!-- 0  Numero de cuenta -->
+                <RowDefinition Height="Auto" />
+                <!-- 1  Nombre -->
+                <RowDefinition Height="Auto" />
+                <!-- 2  Correo -->
+                <RowDefinition Height="Auto" />
+                <!-- 3  Telefono -->
+                <RowDefinition Height="Auto" />
+                <!-- 4  Carrera -->
+                <RowDefinition Height="Auto" />
+                <!-- 5  Fecha de nacimiento -->
+                <RowDefinition Height="Auto" />
+                <!-- 6  Genero (titulo) -->
+                <RowDefinition Height="Auto" />
+                <!-- 7  Genero (opciones) -->
+                <RowDefinition Height="Auto" />
+                <!-- 8  Terminos -->
+                <RowDefinition Height="Auto" />
+                <!-- 9  Botones -->
+                <RowDefinition Height="Auto" />
+                <!-- 10 Titulo lista -->
+                <RowDefinition Height="Auto" />
+                <!-- 11 Sin registros -->
+                <RowDefinition Height="Auto" />
+                <!-- 12 Lista -->
+            </Grid.RowDefinitions>
+
+            <!-- Número de cuenta -->
+            <Label Grid.Row="0" Grid.Column="0" Text="Número de cuenta *" VerticalOptions="Center" />
+            <Entry Grid.Row="0" Grid.Column="1"
+                   x:Name="NumeroCuentaEntry"
+                   Placeholder="Ej. 20231001"
+                   Keyboard="Numeric"
+                   MaxLength="20"
+                   ClearButtonVisibility="WhileEditing"
+                   SemanticProperties.Description="Número de cuenta del estudiante" />
+
+            <!-- Nombre completo -->
+            <Label Grid.Row="1" Grid.Column="0" Text="Nombre completo *" VerticalOptions="Center" />
+            <Entry Grid.Row="1" Grid.Column="1"
+                   x:Name="NombreCompletoEntry"
+                   Placeholder="Nombre y apellido"
+                   Keyboard="Text"
+                   MaxLength="150"
+                   ClearButtonVisibility="WhileEditing"
+                   SemanticProperties.Description="Nombre completo del estudiante" />
+
+            <!-- Correo -->
+            <Label Grid.Row="2" Grid.Column="0" Text="Correo electrónico *" VerticalOptions="Center" />
+            <Entry Grid.Row="2" Grid.Column="1"
+                   x:Name="CorreoEntry"
+                   Placeholder="ejemplo@correo.com"
+                   Keyboard="Email"
+                   MaxLength="150"
+                   ClearButtonVisibility="WhileEditing"
+                   SemanticProperties.Description="Correo electrónico del estudiante" />
+
+            <!-- Teléfono -->
+            <Label Grid.Row="3" Grid.Column="0" Text="Teléfono *" VerticalOptions="Center" />
+            <Entry Grid.Row="3" Grid.Column="1"
+                   x:Name="TelefonoEntry"
+                   Placeholder="Ej. 9999-9999"
+                   Keyboard="Telephone"
+                   MaxLength="20"
+                   ClearButtonVisibility="WhileEditing"
+                   SemanticProperties.Description="Número de teléfono del estudiante" />
+
+            <!-- Carrera -->
+            <Label Grid.Row="4" Grid.Column="0" Text="Carrera *" VerticalOptions="Center" />
+            <Picker Grid.Row="4" Grid.Column="1"
+                    x:Name="CarreraPicker"
+                    Title="Selecciona una carrera"
+                    SemanticProperties.Description="Carrera del estudiante" />
+
+            <!-- Fecha de nacimiento -->
+            <Label Grid.Row="5" Grid.Column="0" Text="Fecha de nacimiento *" VerticalOptions="Center" />
+            <DatePicker Grid.Row="5" Grid.Column="1"
+                        x:Name="FechaNacimientoPicker"
+                        Format="dd/MM/yyyy"
+                        MaximumDate="{x:Static sys:DateTime.Today}"
+                        SemanticProperties.Description="Fecha de nacimiento del estudiante" />
+
+            <!-- Género -->
+            <Label Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="Género *" />
+            <HorizontalStackLayout Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Spacing="16">
+                <RadioButton x:Name="GeneroMasculinoRadio" Content="Masculino" GroupName="Genero" />
+                <RadioButton x:Name="GeneroFemeninoRadio" Content="Femenino" GroupName="Genero" />
+                <RadioButton x:Name="GeneroOtroRadio" Content="Otro" GroupName="Genero" />
+            </HorizontalStackLayout>
+
+            <!-- Términos y condiciones -->
+            <HorizontalStackLayout Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Spacing="8">
+                <CheckBox x:Name="TerminosCheckBox"
+                          SemanticProperties.Description="Acepto los términos y condiciones" />
+                <Label Text="Acepto los términos y condiciones *" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <!-- Botones -->
+            <HorizontalStackLayout Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Spacing="12" Margin="0,12,0,0">
+                <Button
+                    x:Name="GuardarButton"
+                    Text="Guardar estudiante"
+                    BackgroundColor="{StaticResource Turquesa}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    SemanticProperties.Description="Guarda la información del estudiante"
+                    Clicked="GuardarButton_Clicked" />
+
+                <Button
+                    x:Name="LimpiarButton"
+                    Text="Limpiar"
+                    BackgroundColor="{StaticResource Gray400}"
+                    TextColor="White"
+                    SemanticProperties.Description="Limpia el formulario"
+                    Clicked="LimpiarButton_Clicked" />
+            </HorizontalStackLayout>
+
+            <!-- Lista de estudiantes registrados -->
+            <Label Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2"
+                   x:Name="TituloListaLabel"
+                   Text="Estudiantes registrados"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   Margin="0,20,0,0"
+                   SemanticProperties.HeadingLevel="Level2" />
+
+            <Label Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2"
+                   x:Name="SinRegistrosLabel"
+                   Text="Aún no hay estudiantes registrados."
+                   TextColor="Gray"
+                   IsVisible="False" />
+
+            <VerticalStackLayout Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2"
+                x:Name="ListaEstudiantes"
+                Spacing="8">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:Estudiante">
+                        <Border Padding="12" StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="{Binding NombreCompleto}" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="{Binding NumeroCuenta, StringFormat='Cuenta: {0}'}" />
+                                <Label Text="{Binding Carrera}" />
+                                <Label Text="{Binding Telefono, StringFormat='Tel: {0}'}" />
+                                <Label Text="{Binding Correo}" TextColor="Gray" />
+                                <Label Text="{Binding FechaNacimiento, StringFormat='Nacimiento: {0:dd/MM/yyyy}'}" TextColor="Gray" />
+                                <Label Text="{Binding Genero}" TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+        </Grid>
+    </ScrollView>
+</ContentPage>

@@ -12,7 +12,7 @@ namespace RegistroEstudiantes
         protected override Window CreateWindow(IActivationState? activationState)
         {
             // Barra de título azul con texto blanco, como en el diseño de referencia.
-            var navegacion = new NavigationPage(new Views.RegistroEstudiantesPage())
+            var navegacion = new NavigationPage(new Views.RegistroPage())
             {
                 BarBackgroundColor = (Color)Resources["AzulTitulo"],
                 BarTextColor = Colors.White
